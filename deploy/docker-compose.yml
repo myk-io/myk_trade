@@ -1,0 +1,89 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: myk_trade:${MYK_TRADE_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    labels:
+      # Enables traefik for this container.
+    - traefik.enable=true
+    - traefik.http.routers.myk_trade.rule=Host(`${MYK_TRADE_TRAEFIK_HOST:-myk_trade.localhost}`)
+    - traefik.http.routers.myk_trade.entrypoints=http
+    - traefik.http.routers.myk_trade.service=myk_trade
+    - traefik.http.services.myk_trade.loadbalancer.server.port=${MYK_TRADE_PORT:-8000}
+    networks:
+    - default
+    - traefik-shared
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MYK_TRADE_HOST: 0.0.0.0
+      MYK_TRADE_DB_HOST: myk_trade-db
+      MYK_TRADE_DB_PORT: 5432
+      MYK_TRADE_DB_USER: myk_trade
+      MYK_TRADE_DB_PASS: myk_trade
+      MYK_TRADE_DB_BASE: myk_trade
+      MYK_TRADE_REDIS_HOST: myk_trade-redis
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: myk_trade-db
+    environment:
+      POSTGRES_PASSWORD: "myk_trade"
+      POSTGRES_USER: "myk_trade"
+      POSTGRES_DB: "myk_trade"
+    volumes:
+    - myk_trade-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U myk_trade
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: myk_trade:${MYK_TRADE_VERSION:-latest}
+    restart: "no"
+    command: piccolo migrations forwards all
+    environment:
+      MYK_TRADE_DB_HOST: myk_trade-db
+      MYK_TRADE_DB_PORT: 5432
+      MYK_TRADE_DB_USER: myk_trade
+      MYK_TRADE_DB_PASS: myk_trade
+      MYK_TRADE_DB_BASE: myk_trade
+      PICCOLO_CONF: "myk_trade.piccolo_conf"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "myk_trade-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  myk_trade-db-data:
+    name: myk_trade-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared

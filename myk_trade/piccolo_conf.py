@@ -15,5 +15,9 @@ DB = PostgresEngine(
 
 
 APP_REGISTRY = AppRegistry(
-    apps=["myk_trade.db.app_conf"],
+    apps=[
+        "myk_trade.db.app_conf",
+        "piccolo_admin.piccolo_app",
+        "piccolo_api.session_auth.piccolo_app",
+    ],
 )

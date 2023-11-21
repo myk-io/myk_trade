@@ -4,10 +4,21 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from fastapi.staticfiles import StaticFiles
+from piccolo.apps.user.tables import BaseUser
+from piccolo_admin.endpoints import create_admin
+from piccolo_api.session_auth.endpoints import session_login, session_logout
+from piccolo_api.session_auth.middleware import SessionsAuthBackend
+from piccolo_api.shared.auth.junction import AuthenticationBackendJunction
+from piccolo_api.token_auth.middleware import SecretTokenAuthProvider, TokenAuthBackend
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.routing import Mount
 
+from myk_trade.db.models import wallet_model
 from myk_trade.logging import configure_logging
 from myk_trade.web.api.router import api_router
 from myk_trade.web.lifetime import register_shutdown_event, register_startup_event
+from myk_trade.web.private_api.router import api_router as api_router_private
 
 APP_ROOT = Path(__file__).parent.parent
 
@@ -24,18 +35,61 @@ def get_app() -> FastAPI:
     app = FastAPI(
         title="myk_trade",
         version=metadata.version("myk_trade"),
-        docs_url=None,
+        docs_url="/docs",
         redoc_url=None,
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
+        routes=[
+            # to use Piccolo admin:
+            Mount(
+                "/admin/",
+                create_admin(
+                    tables=[BaseUser, wallet_model.WalletModel],
+                ),
+            ),
+            # Session Auth login:
+            Mount(
+                "/login/",
+                session_login(redirect_to="/"),
+            ),
+            # Session Auth logout:
+            Mount(
+                "/logout/",
+                session_logout(redirect_to="/"),
+            ),
+        ],
+    )
+
+    app_private = FastAPI(
+        docs_url="/docs",
+        redoc_url=None,
+        openapi_url="/private/openapi.json",
+        default_response_class=UJSONResponse,
+        middleware=[
+            Middleware(
+                AuthenticationMiddleware,
+                backend=AuthenticationBackendJunction(
+                    backends=[
+                        SessionsAuthBackend(),
+                        TokenAuthBackend(
+                            SecretTokenAuthProvider(tokens=["test_token"]),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    )
+
+    app.mount(
+        "/private/",
+        app_private,
+        name="private",
     )
 
     # Adds startup and shutdown events.
     register_startup_event(app)
     register_shutdown_event(app)
 
-    # Main router for the API.
-    app.include_router(router=api_router, prefix="/api")
     # Adds static directory.
     # This directory is used to access swagger files.
     app.mount(
@@ -43,5 +97,20 @@ def get_app() -> FastAPI:
         StaticFiles(directory=APP_ROOT / "static"),
         name="static",
     )
+
+    # Main router for the API.
+    app.include_router(
+        router=api_router,
+        prefix="/api",
+    )
+
+    # Main router for the private API.
+    app_private.include_router(
+        router=api_router_private,
+        prefix="/api",
+    )
+
+    # Adds session login endpoint.
+    # app.mount("/login", jwt_login)
 
     return app

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.requests import Request
 from piccolo.apps.user.tables import BaseUser
 
-from myk_trade.db.models.wallet_model import WalletModel
+from myk_trade.db.models.transactions import WalletModel
 
 router = APIRouter()
 

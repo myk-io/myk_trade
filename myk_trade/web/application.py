@@ -2,7 +2,7 @@ from importlib import metadata
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import UJSONResponse
+from fastapi.responses import RedirectResponse, UJSONResponse
 from fastapi.staticfiles import StaticFiles
 from piccolo.apps.user.tables import BaseUser
 from piccolo_admin.endpoints import create_admin
@@ -14,11 +14,13 @@ from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.routing import Mount
 
-from myk_trade.db.models import wallet_model
+from myk_trade.db.models import transactions
 from myk_trade.logging import configure_logging
 from myk_trade.web.api.router import api_router
 from myk_trade.web.lifetime import register_shutdown_event, register_startup_event
 from myk_trade.web.private_api.router import api_router as api_router_private
+from myk_trade.web.private_ui.router import ui_router as ui_router_private
+from myk_trade.web.ui.router import ui_router
 
 APP_ROOT = Path(__file__).parent.parent
 
@@ -44,7 +46,11 @@ def get_app() -> FastAPI:
             Mount(
                 "/admin/",
                 create_admin(
-                    tables=[BaseUser, wallet_model.WalletModel],
+                    tables=[
+                        BaseUser,
+                        transactions.WalletModel,
+                        transactions.TransactionModel,
+                    ],
                 ),
             ),
             # Session Auth login:
@@ -104,11 +110,28 @@ def get_app() -> FastAPI:
         prefix="/api",
     )
 
+    # Ui using Jinja2.
+    app.mount(
+        "/ui",
+        ui_router,
+        name="ui",
+    )
+
     # Main router for the private API.
     app_private.include_router(
         router=api_router_private,
         prefix="/api",
     )
+
+    # Main router for the private API.
+    app_private.include_router(
+        router=ui_router_private,
+        prefix="/ui",
+    )
+
+    @app.get("/")
+    async def _index():
+        return RedirectResponse(url="/ui/")
 
     # Adds session login endpoint.
     # app.mount("/login", jwt_login)

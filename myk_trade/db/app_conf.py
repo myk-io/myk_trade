@@ -14,7 +14,7 @@ APP_CONFIG = AppConfig(
     table_classes=table_finder(
         exclude_imported=True,
         modules=[
-            "myk_trade.db.models.wallet_model",
+            "myk_trade.db.models.transactions",
         ],
     ),
     migration_dependencies=[],

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block style %}
+  <style>
+    li.htmx-swapping {
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="uk-card uk-card-default uk-card-body uk-width-1-2@m uk-margin-top">
+    <div>
+      <div hx-get="/api/transactions/"
+           hx-swap="innerHTML"
+           hx-trigger="load"
+           hx-ext="client-side-templates"
+           mustache-template="total_transcations"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    htmx.on('htmx:afterSwap', function(event) {
+      document.getElementById("contentInput").value = ""
+    });
+  </script>
+{% endblock %}

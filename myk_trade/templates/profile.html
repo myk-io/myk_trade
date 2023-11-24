@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block style %}
+  <style>
+    li.htmx-swapping {
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="uk-card uk-align-left uk-card-default uk-card-body uk-margin-top uk-width-1-4@m">
+    <div>
+      <div hx-get="/private/api/profile"
+          hx-swap="innerHTML"
+          hx-trigger="load"
+          hx-ext="client-side-templates"
+          mustache-template="profile">
+      </div>
+    </div>
+  </div>
+  <div class="uk-card uk-align-center uk-card-default uk-card-body uk-margin-top uk-width-1@m">
+    <div>
+      <div hx-get="/private/api/profile/wallets"
+          hx-swap="innerHTML"
+          hx-trigger="load"
+          hx-ext="client-side-templates"
+          mustache-template="wallets">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    htmx.on('htmx:afterSwap', function(event) {
+      document.getElementById("contentInput").value = ""
+    });
+  </script>
+{% endblock %}

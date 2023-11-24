@@ -19,27 +19,21 @@
 
     {% block style %}
     {% endblock %}
-
 </head>
-<body class="uk-background-secondary" uk-height-viewport>
+
+<body class="uk-background">
 {% block header %}
 {% include 'fragments/header.html' %}
 {% endblock %}
 
-<div class="uk-container uk-flex uk-flex-center">
-    {% block content %}
-    {% endblock %}
-</div>
+{% block content %}
+{% endblock %}
 
-<template id="total_transcations">Total transactions: {% raw %}{{count}}{% endraw %}</template>
+{% block javascript %}
+{% endblock %}
 
-<template id="profile">
-<ul class="uk-list">
-    <li>Email: {% raw %}{{email}}{% endraw %}</li>
-    <li>Name: {% raw %}{{first_name}}{% endraw %}</li>
-    <li>Last name: {% raw %}{{last_name}}{% endraw %}</li>
-    <li>Admin: {% raw %}{{admin}}{% endraw %}</li>
-</ul>
+<template id="total_transcations">
+    Total transactions: {% raw %}{{count}}{% endraw %}
 </template>
 
 <template id="wallets">
@@ -50,7 +44,5 @@
     </ul>
 </template>
 
-{% block javascript %}
-{% endblock %}
 </body>
 </html>

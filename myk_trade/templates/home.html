@@ -10,15 +10,51 @@
 {% endblock %}
 
 {% block content %}
-  <div class="uk-card uk-card-default uk-card-body uk-width-1-2@m uk-margin-top">
-    <div>
-      <div hx-get="/api/transactions/"
-           hx-swap="innerHTML"
-           hx-trigger="load"
-           hx-ext="client-side-templates"
-           mustache-template="total_transcations"></div>
+  <div class="uk-container">
+    <div class="uk-grid uk-grid-divider" uk-grid>
+      <div class="uk-width-3-5 uk-row-first">
+        <h3 class="uk-margin-top">Last transactions</h3>
+
+        <table class="uk-table uk-table-divider">
+            <caption>Data for last 24h</caption>
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>333333</td>
+                    <td>444444</td>
+                    <td>3303030</td>
+                    <td>uah</td>
+                </tr>
+                <tr>
+                    <td>333333</td>
+                    <td>444444</td>
+                    <td>3303030</td>
+                    <td>uah</td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+
+      <div class="uk-width-2-5 uk-row-first">
+        <h3 class="uk-margin-top">Statistics</h3>
+        <div>
+          <div class="uk-card uk-card-default uk-card-body">
+            <h3 class="uk-card-title">Total transactions</h3>
+            <p>Count: 100</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
+
 {% endblock %}
 
 {% block javascript %}

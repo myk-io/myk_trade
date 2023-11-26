@@ -1,6 +1,6 @@
 from piccolo.apps.migrations.auto.migration_manager import MigrationManager
 
-ID = "2023-11-23T22:49:33:979876"
+ID = "2023-11-25T21:46:08:629430"
 VERSION = "0.117.0"
 DESCRIPTION = ""
 
@@ -13,12 +13,12 @@ async def forwards():
     )
 
     manager.rename_column(
-        table_class_name="TransactionModel",
-        tablename="transaction_model",
-        old_column_name="date",
-        new_column_name="created_at",
-        old_db_column_name="date",
-        new_db_column_name="created_at",
+        table_class_name="WalletModel",
+        tablename="wallet_model",
+        old_column_name="amount",
+        new_column_name="balance",
+        old_db_column_name="amount",
+        new_db_column_name="balance",
     )
 
     return manager

@@ -15,7 +15,8 @@
     <!-- Htmx -->
     <script src="https://unpkg.com/htmx.org@1.3.3" integrity="sha384-QrlPmoLqMVfnV4lzjmvamY0Sv/Am8ca1W7veO++Sp6PiIGixqkD+0xZ955Nc03qO" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
-    <script src="https://unpkg.com/mustache@latest"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
 
     {% block style %}
     {% endblock %}
@@ -31,18 +32,6 @@
 
 {% block javascript %}
 {% endblock %}
-
-<template id="total_transcations">
-    Total transactions: {% raw %}{{count}}{% endraw %}
-</template>
-
-<template id="wallets">
-    <ul class="uk-list">
-        {{data}}
-        <li>Name: {% raw %}{{first_name}}{% endraw %}</li>
-        {{data}}
-    </ul>
-</template>
 
 </body>
 </html>

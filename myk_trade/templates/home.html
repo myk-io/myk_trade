@@ -26,18 +26,14 @@
                 </tr>
             </thead>
             <tbody>
+              {% for transaction in transactions %}
                 <tr>
-                    <td>333333</td>
-                    <td>444444</td>
-                    <td>3303030</td>
-                    <td>uah</td>
+                    <td><input class="uk-input" type="text" placeholder="From" value="{{ transaction.sender_wallet_id }}" readonly></td>
+                    <td><input class="uk-input" type="text" placeholder="To" value="{{ transaction.receiver_wallet_id }}" readonly></td>
+                    <td><input class="uk-input" type="text" placeholder="Amount" value="{{ transaction.amount }}" readonly></td>
+                    <td><b>{{ transaction['currency.code'] }}</b></td>
                 </tr>
-                <tr>
-                    <td>333333</td>
-                    <td>444444</td>
-                    <td>3303030</td>
-                    <td>uah</td>
-                </tr>
+              {% endfor %}
             </tbody>
         </table>
       </div>
@@ -47,7 +43,7 @@
         <div>
           <div class="uk-card uk-card-default uk-card-body">
             <h3 class="uk-card-title">Total transactions</h3>
-            <p>Count: 100</p>
+            <p>Count: {{ transactions_total }}</p>
           </div>
         </div>
       </div>

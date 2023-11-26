@@ -18,8 +18,6 @@ from myk_trade.db.models import transactions
 from myk_trade.logging import configure_logging
 from myk_trade.web.api.router import api_router
 from myk_trade.web.lifetime import register_shutdown_event, register_startup_event
-from myk_trade.web.private_api.router import api_router as api_router_private
-from myk_trade.web.private_ui.router import ui_router as ui_router_private
 from myk_trade.web.ui.router import ui_router
 
 APP_ROOT = Path(__file__).parent.parent
@@ -48,6 +46,7 @@ def get_app() -> FastAPI:
                 create_admin(
                     tables=[
                         BaseUser,
+                        transactions.CurrencyModel,
                         transactions.WalletModel,
                         transactions.TransactionModel,
                     ],
@@ -64,19 +63,15 @@ def get_app() -> FastAPI:
                 session_logout(redirect_to="/"),
             ),
         ],
-    )
-
-    app_private = FastAPI(
-        docs_url="/docs",
-        redoc_url=None,
-        openapi_url="/private/openapi.json",
-        default_response_class=UJSONResponse,
         middleware=[
             Middleware(
                 AuthenticationMiddleware,
                 backend=AuthenticationBackendJunction(
                     backends=[
-                        SessionsAuthBackend(),
+                        SessionsAuthBackend(
+                            allow_unauthenticated=True,
+                            admin_only=False,
+                        ),
                         TokenAuthBackend(
                             SecretTokenAuthProvider(tokens=["test_token"]),
                         ),
@@ -84,12 +79,6 @@ def get_app() -> FastAPI:
                 ),
             ),
         ],
-    )
-
-    app.mount(
-        "/private/",
-        app_private,
-        name="private",
     )
 
     # Adds startup and shutdown events.
@@ -115,18 +104,6 @@ def get_app() -> FastAPI:
         "/ui",
         ui_router,
         name="ui",
-    )
-
-    # Main router for the private API.
-    app_private.include_router(
-        router=api_router_private,
-        prefix="/api",
-    )
-
-    # Main router for the private API.
-    app_private.include_router(
-        router=ui_router_private,
-        prefix="/ui",
     )
 
     @app.get("/")

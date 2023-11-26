@@ -3,9 +3,12 @@
         <div uk-navbar>
             <div class="uk-navbar-left">
                 <ul class="uk-navbar-nav">
+                    {% if is_authenticated %}
+                    <li class="uk-hidden-small"><a href="/ui/profile">My Profile</a></li>
+                    {% else %}
                     <li class="uk-hidden-small"><a href="/login">Login</a></li>
+                    {% endif %}
                     <li class="uk-hidden-small"><a href="/">Dashboard</a></li>
-                    <li class="uk-hidden-small"><a href="/private/ui/profile">My Profile</a></li>
                 </ul>
             </div>
 

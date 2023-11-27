@@ -8,7 +8,6 @@ on:
 env:
   ENV_NAME: main
   REGISTRY: ghcr.io
-  CONTAINER_NAME: app
   IMAGE_NAME: ${{ github.repository }}
 
 
@@ -35,6 +34,14 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: |
+          ghcr.io/${{ github.repository }}
+
+
     - name: Build and push app
       id: build-and-push-app
       uses: docker/build-push-action@v5
@@ -48,6 +55,3 @@ jobs:
         push: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        tags: |
-          ${{ env.REGISTRY }}/orplayground/myk_trade:${{ env.IMAGE_TAG }}
-          ${{ env.REGISTRY }}/orplayground/myk_trade:latest

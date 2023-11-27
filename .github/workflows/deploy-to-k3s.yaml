@@ -49,5 +49,5 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGISTRY }}/ORPlayground/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          ${{ env.REGISTRY }}/ORPlayground/${{ env.IMAGE_NAME }}:latest

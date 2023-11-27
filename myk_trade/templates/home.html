@@ -13,16 +13,15 @@
   <div class="uk-container">
     <div class="uk-grid uk-grid-divider" uk-grid>
       <div class="uk-width-3-5 uk-row-first">
-        <h3 class="uk-margin-top">Last transactions</h3>
-
-        <table class="uk-table uk-table-divider">
-            <caption>Data for last 24h</caption>
+        <p class="uk-text-lead uk-text-center uk-margin-top">Latest transfers</p>
+        <hr>
+        <table class="uk-table uk-table-hover uk-overflow-auto">
             <thead>
                 <tr>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount</th>
-                    <th>Currency</th>
+                    <th class="uk-width-large">From</th>
+                    <th class="uk-width-large">To</th>
+                    <th class="uk-width-small">Amount</th>
+                    <th class="uk-width-small">Currency</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,8 +29,8 @@
                 <tr>
                     <td><input class="uk-input" type="text" placeholder="From" value="{{ transaction.sender_wallet_id }}" readonly></td>
                     <td><input class="uk-input" type="text" placeholder="To" value="{{ transaction.receiver_wallet_id }}" readonly></td>
-                    <td><input class="uk-input" type="text" placeholder="Amount" value="{{ transaction.amount }}" readonly></td>
-                    <td><b>{{ transaction['currency.code'] }}</b></td>
+                    <td><input class="uk-input uk-text-right uk-text-primary" type="text" placeholder="Amount" value="{{ transaction.amount|round(2) }}" readonly></td>
+                    <td><input class="uk-input uk-text-bold" type="text" placeholder="Currency" value="{{ transaction['currency.code'] }}" readonly></td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -39,11 +38,35 @@
       </div>
 
       <div class="uk-width-2-5 uk-row-first">
-        <h3 class="uk-margin-top">Statistics</h3>
-        <div>
+        <div class="uk-margin-top">
           <div class="uk-card uk-card-default uk-card-body">
-            <h3 class="uk-card-title">Total transactions</h3>
-            <p>Count: {{ transactions_total }}</p>
+            <h1 class="uk-card-title uk-text-center">Transactions</h1>
+            <p>All time: <b>{{ transactions_count }}</b></p>
+            <p>Last 24h: <b>{{ transactions_count_24h }}</b></p>
+            <h1 class="uk-card-title uk-text-center">Amount</h1>
+            <p>All time: <b>{{ transactions_amount|round(2) }} $</b></p>
+            <p>Last 24h: <b>{{ transactions_amount_24h|round(2) }} $</b></p>
+          </div>
+        </div>
+        <div class="uk-margin-top">
+          <div class="uk-card uk-card-default uk-card-body">
+            <h1 class="uk-card-title uk-text-center">Exchange rate</h1>
+            <table class="uk-table uk-table-divider">
+              <thead>
+                <tr>
+                  <th class="uk-text-center">Currency</th>
+                  <th class="uk-text-center">Rate</th>
+                  <th class="uk-text-center">Inverse rate</th>
+                </tr>
+            </thead>
+              {% for currency in currencies %}
+                <tr class="uk-text-center">
+                  <td><b>{{ currency.code }}</b></td>
+                  <td><b>{{ currency.to_base_rate }}</b></td>
+                  <td><b>{{ (1/currency.to_base_rate)|round(2) }}</b></td>
+                </tr>
+              {% endfor %}
+            </table>
           </div>
         </div>
       </div>

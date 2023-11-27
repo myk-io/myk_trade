@@ -6,7 +6,11 @@ from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from myk_trade.db.models.transactions import TransactionModel, WalletModel
+from myk_trade.db.models.transactions import (
+    CurrencyModel,
+    TransactionModel,
+    WalletModel,
+)
 
 router = APIRouter()
 
@@ -26,26 +30,75 @@ async def send_echo_message(
     :returns: message same as the incoming.
     """
 
-    transactions_total = await TransactionModel.count().run()
+    transactions_count = await TransactionModel.count().run()
+    transactions_count_24h = (
+        await TransactionModel.count()
+        .where(
+            TransactionModel.created_at
+            > datetime.datetime.now() - datetime.timedelta(days=1),  # for last 24 hours
+        )
+        .run()
+    )
+
+    transactions_amount = 0
+    transactions_amount_24h = 0
+    for currency in await CurrencyModel.select(CurrencyModel.all_columns()).run():
+        transactions_24h = (
+            await TransactionModel.select(
+                TransactionModel.all_columns(),
+            )
+            .where(
+                TransactionModel.created_at
+                > datetime.datetime.now()
+                - datetime.timedelta(days=1),  # for last 24 hours
+            )
+            .where(
+                TransactionModel.currency == currency["id"],
+            )
+            .run()
+        )
+
+        for t in transactions_24h:
+            transactions_amount_24h += float(t["amount"]) * float(
+                currency["to_base_rate"],
+            )
+
+        transactions = (
+            await TransactionModel.select(
+                TransactionModel.all_columns(),
+            )
+            .where(
+                TransactionModel.currency == currency["id"],
+            )
+            .run()
+        )
+
+        for t in transactions:
+            transactions_amount += float(t["amount"]) * float(currency["to_base_rate"])
+
     transactions = (
         await TransactionModel.select(
             TransactionModel.all_columns(),
             TransactionModel.currency.code,
         )
-        .where(
-            TransactionModel.created_at
-            > datetime.datetime.now() - datetime.timedelta(days=1),  # for last 24 hours
-        )
+        .limit(100)
+        .order_by(TransactionModel.created_at, ascending=False)
         .run(nested=True)
     )
+
+    currencies = await CurrencyModel.select(CurrencyModel.all_columns()).run()
 
     return templates.TemplateResponse(
         "home.html",
         {
             "request": {"type": "html"},
             "is_authenticated": request.user.is_authenticated,
-            "transactions_total": transactions_total,
+            "transactions_count": transactions_count,
+            "transactions_count_24h": transactions_count_24h,
+            "transactions_amount": transactions_amount,
+            "transactions_amount_24h": transactions_amount_24h,
             "transactions": transactions,
+            "currencies": currencies,
             "user": request.user.user,
             "title": "Myk Trade",
         },

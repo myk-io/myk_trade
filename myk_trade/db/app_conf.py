@@ -17,6 +17,10 @@ APP_CONFIG = AppConfig(
             "myk_trade.db.models.transactions",
         ],
     ),
-    migration_dependencies=[],
+    migration_dependencies=[
+        "piccolo.apps.user.piccolo_app",
+        "piccolo_admin.piccolo_app",
+        "piccolo_api.token_auth.piccolo_app",
+    ],
     commands=[],
 )

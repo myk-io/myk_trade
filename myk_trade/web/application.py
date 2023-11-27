@@ -9,7 +9,8 @@ from piccolo_admin.endpoints import create_admin
 from piccolo_api.session_auth.endpoints import session_login, session_logout
 from piccolo_api.session_auth.middleware import SessionsAuthBackend
 from piccolo_api.shared.auth.junction import AuthenticationBackendJunction
-from piccolo_api.token_auth.middleware import SecretTokenAuthProvider, TokenAuthBackend
+from piccolo_api.token_auth.middleware import PiccoloTokenAuthProvider, TokenAuthBackend
+from piccolo_api.token_auth.tables import TokenAuth
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.routing import Mount
@@ -46,6 +47,7 @@ def get_app() -> FastAPI:
                 create_admin(
                     tables=[
                         BaseUser,
+                        TokenAuth,
                         transactions.CurrencyModel,
                         transactions.WalletModel,
                         transactions.TransactionModel,
@@ -68,12 +70,12 @@ def get_app() -> FastAPI:
                 AuthenticationMiddleware,
                 backend=AuthenticationBackendJunction(
                     backends=[
+                        TokenAuthBackend(
+                            token_auth_provider=PiccoloTokenAuthProvider(),
+                        ),
                         SessionsAuthBackend(
                             allow_unauthenticated=True,
                             admin_only=False,
-                        ),
-                        TokenAuthBackend(
-                            SecretTokenAuthProvider(tokens=["test_token"]),
                         ),
                     ],
                 ),

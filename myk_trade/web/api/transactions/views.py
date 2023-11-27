@@ -1,4 +1,5 @@
 import datetime
+import decimal
 
 from fastapi import APIRouter
 from fastapi.requests import Request
@@ -80,7 +81,9 @@ async def create_trans(
         )
 
     sender_wallet = (
-        await transactions.WalletModel.select()
+        await transactions.WalletModel.select(
+            transactions.WalletModel.all_columns(),
+        )
         .where(
             transactions.WalletModel.uuid == transaction.sender_wallet_uuid,
         )
@@ -92,7 +95,9 @@ async def create_trans(
         return Response(status_code=404, content="Sender wallet not found")
 
     recipient_wallet = (
-        await transactions.WalletModel.select()
+        await transactions.WalletModel.select(
+            transactions.WalletModel.all_columns(),
+        )
         .where(
             transactions.WalletModel.uuid == transaction.recipient_wallet_uuid,
         )
@@ -106,8 +111,22 @@ async def create_trans(
     if sender_wallet.get("user_id") != user.id:
         return Response(status_code=403, content="Forbidden")
 
+    if recipient_wallet.get("currency") != sender_wallet.get("currency"):
+        return Response(
+            status_code=400,
+            content="Sender and recipient wallets must be the same currency",
+        )
+
     if sender_wallet.get("balance") < transaction.amount:
         return Response(status_code=403, content="Not enough money")
+
+    if transaction.amount <= 0:
+        return Response(status_code=400, content="Invalid amount")
+
+    try:
+        transaction.amount = decimal.Decimal(transaction.amount)
+    except decimal.InvalidOperation:
+        return Response(status_code=400, content="Invalid amount")
 
     sender_wallet_balance = sender_wallet.get("balance") - transaction.amount
     recipient_wallet_balance = recipient_wallet.get("balance") + transaction.amount

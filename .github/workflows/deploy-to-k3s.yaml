@@ -45,8 +45,6 @@ jobs:
     - name: Build and push app
       id: build-and-push-app
       uses: docker/build-push-action@v5
-      env:
-        IMAGE_TAG: ${{ github.sha }}
       with:
         context: .
         file: deploy/Dockerfile
@@ -55,5 +53,7 @@ jobs:
         push: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        tags: |
+          ${{ github.sha }}
+          latest

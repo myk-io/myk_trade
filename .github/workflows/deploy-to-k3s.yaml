@@ -44,10 +44,7 @@ jobs:
       with:
         context: .
         file: deploy/Dockerfile
-        no-cache: false
         push: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         labels: ${{ steps.meta.outputs.labels }}
         tags: |
           ${{ github.sha }}

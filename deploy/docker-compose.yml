@@ -23,8 +23,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     environment:
       MYK_TRADE_HOST: 0.0.0.0
       MYK_TRADE_DB_HOST: myk_trade-db
@@ -32,7 +30,6 @@ services:
       MYK_TRADE_DB_USER: myk_trade
       MYK_TRADE_DB_PASS: myk_trade
       MYK_TRADE_DB_BASE: myk_trade
-      MYK_TRADE_REDIS_HOST: myk_trade-redis
 
   db:
     image: postgres:13.8-bullseye
@@ -64,19 +61,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  redis:
-    image: bitnami/redis:6.2.5
-    hostname: "myk_trade-redis"
-    restart: always
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-    healthcheck:
-      test: redis-cli ping
-      interval: 1s
-      timeout: 3s
-      retries: 50
-
 
 
 volumes:

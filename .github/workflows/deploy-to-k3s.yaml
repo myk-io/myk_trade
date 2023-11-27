@@ -56,5 +56,5 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         tags: |
-          {{ .env.REGISTRY }}/${{ github.repository }}:latest
-          {{ .env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+          latest
+          ${{ github.sha }}

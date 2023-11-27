@@ -1,5 +1,15 @@
 # myk_trade
 
+
+## Description
+
+Myk Trade is a web application which represents simple bank system.
+Includes:
+- token authentication
+- session authentication
+
+## Template used
+
 This project was generated using fastapi_template.
 
 ## Poetry

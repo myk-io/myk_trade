@@ -55,5 +55,11 @@ jobs:
         cache-to: type=gha,mode=max
         labels: ${{ steps.meta.outputs.labels }}
         tags: |
-          ghcr.io/${{ github.repository }}:latest
-          ghcr.io/${{ github.repository }}:${{ github.sha }}
+          ${{ env.REGISTRY }}/${{ github.repository }}:latest
+          ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+
+    - uses: actions-hub/kubectl@master
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+      with:
+        args: kubectl -n myk_trade set image deployment/myk-trade-myk-trade-chart myk-trade=${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}

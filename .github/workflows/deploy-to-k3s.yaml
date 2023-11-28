@@ -58,8 +58,8 @@ jobs:
           ${{ env.REGISTRY }}/${{ github.repository }}:latest
           ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
 
-    - uses: actions-hub/kubectl@master
-      env:
-        KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+    - uses: WyriHaximus/github-action-helm3@v3
       with:
-        args: -n myk_trade set image deployment/myk-trade-myk-trade-chart myk-trade=${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+        exec: helm -n myk-trade upgrade myk-trade ./myk-trade-chart/ --install --wait --atomic
+        kubeconfig: '${{ secrets.KUBECONFIG }}'
+        overrule_existing_kubeconfig: "true"

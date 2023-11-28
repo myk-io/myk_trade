@@ -1,10 +1,12 @@
 import datetime
+import logging
 from pathlib import Path
 
 from fastapi import APIRouter
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from piccolo.query import Sum
 
 from myk_trade.db.models.transactions import (
     CurrencyModel,
@@ -14,15 +16,17 @@ from myk_trade.db.models.transactions import (
 
 router = APIRouter()
 
+log = logging.getLogger(__name__)
+
 APP_ROOT = Path(__file__).parent.parent.parent.parent
 
 templates = Jinja2Templates(directory=APP_ROOT / "templates")
 
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/")
 async def send_echo_message(
     request: Request,
-) -> HTMLResponse:
+):
     """
     Sends echo back to user.
 
@@ -30,53 +34,29 @@ async def send_echo_message(
     :returns: message same as the incoming.
     """
 
-    transactions_count_24h = (
-        await TransactionModel.count()
-        .where(
-            TransactionModel.created_at
-            > datetime.datetime.now() - datetime.timedelta(days=1),  # for last 24 hours
-        )
-        .run()
+    transactions_sum_select = TransactionModel.select(
+        TransactionModel.currency.code,
+        TransactionModel.currency.to_base_rate,
+        Sum(TransactionModel.amount),
+    ).group_by(
+        TransactionModel.currency.code,
+        TransactionModel.currency.to_base_rate,
     )
-    transactions_count = await TransactionModel.count().run()
 
-    transactions_amount_24h = 0
+    transactions_sum_by_currency = await transactions_sum_select.run()
     transactions_amount = 0
-    for currency in await CurrencyModel.select(CurrencyModel.all_columns()).run():
-        transactions_24h = (
-            await TransactionModel.select(
-                TransactionModel.all_columns(),
-            )
-            .where(
-                TransactionModel.created_at
-                > datetime.datetime.now()
-                - datetime.timedelta(days=1),  # for last 24 hours
-            )
-            .where(
-                TransactionModel.currency == currency["id"],
-            )
-            .run()
-        )
+    for t in transactions_sum_by_currency:
+        transactions_amount += float(t.get("sum")) * t.get("currency.to_base_rate")
 
-        for t in transactions_24h:
-            transactions_amount_24h += float(t["amount"]) * float(
-                currency["to_base_rate"],
-            )
+    transactions_sum_by_currency_24h = await transactions_sum_select.where(
+        TransactionModel.created_at
+        > datetime.datetime.now() - datetime.timedelta(days=1),
+    ).run()
+    transactions_amount_24h = 0
+    for t in transactions_sum_by_currency_24h:
+        transactions_amount_24h += float(t.get("sum")) * t.get("currency.to_base_rate")
 
-        transactions = (
-            await TransactionModel.select(
-                TransactionModel.all_columns(),
-            )
-            .where(
-                TransactionModel.currency == currency["id"],
-            )
-            .run()
-        )
-
-        for t in transactions:
-            transactions_amount += float(t["amount"]) * float(currency["to_base_rate"])
-
-    transactions = (
+    transactions_latest = (
         await TransactionModel.select(
             TransactionModel.all_columns(),
             TransactionModel.currency.code,
@@ -86,7 +66,20 @@ async def send_echo_message(
         .run(nested=True)
     )
 
-    currencies = await CurrencyModel.select(CurrencyModel.all_columns()).run()
+    transactions_count = await TransactionModel.count().run()
+
+    transactions_count_24h = (
+        await TransactionModel.count()
+        .where(
+            TransactionModel.created_at
+            > datetime.datetime.now() - datetime.timedelta(days=1),
+        )
+        .run()
+    )
+
+    currencies = await CurrencyModel.select(
+        CurrencyModel.all_columns(),
+    ).run()
 
     return templates.TemplateResponse(
         "home.html",
@@ -97,7 +90,7 @@ async def send_echo_message(
             "transactions_count_24h": transactions_count_24h,
             "transactions_amount": transactions_amount,
             "transactions_amount_24h": transactions_amount_24h,
-            "transactions": transactions,
+            "transactions": transactions_latest,
             "currencies": currencies,
             "user": request.user.user,
             "title": "Myk Trade",

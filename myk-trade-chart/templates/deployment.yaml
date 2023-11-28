@@ -41,13 +41,12 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
-            httpGet:
-              timeoutSeconds: 5
-              path: /api/health
+            timeoutSeconds: 5
+            tcpSocket:
               port: http
           readinessProbe:
+            timeoutSeconds: 5
             httpGet:
-              timeoutSeconds: 5
               path: /api/health
               port: http
           env:

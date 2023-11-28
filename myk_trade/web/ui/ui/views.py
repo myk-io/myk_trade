@@ -30,7 +30,6 @@ async def send_echo_message(
     :returns: message same as the incoming.
     """
 
-    transactions_count = await TransactionModel.count().run()
     transactions_count_24h = (
         await TransactionModel.count()
         .where(
@@ -39,6 +38,7 @@ async def send_echo_message(
         )
         .run()
     )
+    transactions_count = await TransactionModel.count().run()
 
     transactions_amount = 0
     transactions_amount_24h = 0
@@ -82,7 +82,6 @@ async def send_echo_message(
             TransactionModel.currency.code,
         )
         .order_by(TransactionModel.created_at, ascending=False)
-        .limit(100)
         .run(nested=True)
     )
 

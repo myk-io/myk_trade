@@ -128,28 +128,35 @@ async def create_trans(
     except decimal.InvalidOperation:
         return Response(status_code=400, content="Invalid amount")
 
-    sender_wallet_balance = sender_wallet.get("balance") - transaction.amount
-    recipient_wallet_balance = recipient_wallet.get("balance") + transaction.amount
+    DB = transactions.TransactionModel._meta.db
 
-    await transactions.WalletModel.update({"balance": sender_wallet_balance}).where(
-        transactions.WalletModel.uuid == transaction.sender_wallet_uuid,
-    ).run()
+    async with DB.transaction():
+        sender_wallet_balance = sender_wallet.get("balance") - transaction.amount
+        recipient_wallet_balance = recipient_wallet.get("balance") + transaction.amount
 
-    await transactions.WalletModel.update(
-        {
-            "balance": recipient_wallet_balance,
-        },
-    ).where(
-        transactions.WalletModel.uuid == transaction.recipient_wallet_uuid,
-    ).run()
+        await transactions.WalletModel.update(
+            {
+                "balance": sender_wallet_balance,
+            },
+        ).where(
+            transactions.WalletModel.uuid == transaction.sender_wallet_uuid,
+        ).run()
 
-    await transactions.TransactionModel(
-        sender_wallet_id=transaction.sender_wallet_uuid,
-        receiver_wallet_id=transaction.recipient_wallet_uuid,
-        amount=transaction.amount,
-        currency=sender_wallet.get("currency"),
-        created_at=datetime.datetime.now(),
-        status="success",
-    ).save().run()
+        await transactions.WalletModel.update(
+            {
+                "balance": recipient_wallet_balance,
+            },
+        ).where(
+            transactions.WalletModel.uuid == transaction.recipient_wallet_uuid,
+        ).run()
+
+        await transactions.TransactionModel(
+            sender_wallet_id=transaction.sender_wallet_uuid,
+            receiver_wallet_id=transaction.recipient_wallet_uuid,
+            amount=transaction.amount,
+            currency=sender_wallet.get("currency"),
+            created_at=datetime.datetime.now(),
+            status="success",
+        ).save().run()
 
     return Response(status_code=200, content="Transaction created")

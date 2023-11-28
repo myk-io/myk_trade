@@ -56,27 +56,6 @@ async def send_echo_message(
     for t in transactions_sum_by_currency_24h:
         transactions_amount_24h += float(t.get("sum")) * t.get("currency.to_base_rate")
 
-    transactions_latest = (
-        await TransactionModel.select(
-            TransactionModel.all_columns(),
-            TransactionModel.currency.code,
-        )
-        .order_by(TransactionModel.id, ascending=False)
-        .limit(30)
-        .run(nested=True)
-    )
-
-    transactions_count = await TransactionModel.count().run()
-
-    transactions_count_24h = (
-        await TransactionModel.count()
-        .where(
-            TransactionModel.created_at
-            > datetime.datetime.now() - datetime.timedelta(days=1),
-        )
-        .run()
-    )
-
     currencies = await CurrencyModel.select(
         CurrencyModel.all_columns(),
     ).run()
@@ -86,11 +65,8 @@ async def send_echo_message(
         {
             "request": {"type": "html"},
             "is_authenticated": request.user.is_authenticated,
-            "transactions_count": transactions_count,
-            "transactions_count_24h": transactions_count_24h,
             "transactions_amount": transactions_amount,
             "transactions_amount_24h": transactions_amount_24h,
-            "transactions": transactions_latest,
             "currencies": currencies,
             "user": request.user.user,
             "title": "Myk Trade",

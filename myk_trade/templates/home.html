@@ -24,15 +24,11 @@
                     <th class="uk-width-small">Currency</th>
                 </tr>
             </thead>
-            <tbody>
-              {% for transaction in transactions %}
-                <tr>
-                    <td><input class="uk-input" type="text" placeholder="From" value="{{ transaction.sender_wallet_id }}" readonly></td>
-                    <td><input class="uk-input" type="text" placeholder="To" value="{{ transaction.receiver_wallet_id }}" readonly></td>
-                    <td><input class="uk-input uk-text-right uk-text-primary" type="text" placeholder="Amount" value="{{ transaction.amount|round(2) }}" readonly></td>
-                    <td><input class="uk-input uk-text-bold" type="text" placeholder="Currency" value="{{ transaction['currency.code'] }}" readonly></td>
-                </tr>
-              {% endfor %}
+            <tbody hx-swap="innerHTML"
+                   hx-get="/api/transactions?__visible_fields=currency.code,amount,sender_wallet_id,receiver_wallet_id"
+                   hx-trigger="load"
+                   hx-ext="client-side-templates"
+                   mustache-template="transactions-template">
             </tbody>
         </table>
       </div>
@@ -41,8 +37,16 @@
         <div class="uk-margin-top">
           <div class="uk-card uk-card-default uk-card-body">
             <h1 class="uk-card-title uk-text-center">Transactions</h1>
-            <p>All time: <b>{{ transactions_count }}</b></p>
-            <p>Last 24h: <b>{{ transactions_count_24h }}</b></p>
+            <p>All time: <b htmx-swap="innerHTML"
+                            hx-get="/api/transactions/count"
+                            hx-trigger="load"
+                            hx-ext="client-side-templates"
+                            mustache-template="count-template"></b></p>
+            <p>Last 24h: <b htmx-swap="innerHTML"
+                            hx-get="/api/transactions/count?days=1"
+                            hx-trigger="load"
+                            hx-ext="client-side-templates"
+                            mustache-template="count-template"></b></p>
             <h1 class="uk-card-title uk-text-center">Amount</h1>
             <p>All time: <b>{{ transactions_amount|round(2) }} $</b></p>
             <p>Last 24h: <b>{{ transactions_amount_24h|round(2) }} $</b></p>
@@ -73,6 +77,20 @@
 
     </div>
   </div>
+
+  <template id="count-template">{% raw %}{{ count }}{% endraw %}</template>
+  <template id="transactions-template">
+{% raw %}
+    {{ #rows }}
+    <tr>
+        <td><input class="uk-input" type="text" placeholder="From" value="{{ sender_wallet_id }}" readonly></td>
+        <td><input class="uk-input" type="text" placeholder="To" value="{{ receiver_wallet_id }}" readonly></td>
+        <td><input class="uk-input uk-text-right uk-text-primary" type="text" placeholder="Amount" value="{{ amount }}" readonly></td>
+        <td><input class="uk-input uk-text-bold" type="text" placeholder="Currency" value="{{ currency.code }}" readonly></td>
+    </tr>
+    {{ /rows }}
+{% endraw %}
+  </template>
 
 {% endblock %}
 

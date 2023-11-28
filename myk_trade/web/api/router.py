@@ -20,7 +20,11 @@ api_router.include_router(
 crud_wraped = FastAPIWrapper(
     root_url="/transactions",
     fastapi_app=api_router,
-    piccolo_crud=PiccoloCRUD(transactions_model.TransactionModel, read_only=True),
+    piccolo_crud=PiccoloCRUD(
+        transactions_model.TransactionModel,
+        max_joins=1,
+        read_only=True,
+    ),
     fastapi_kwargs=FastAPIKwargs(
         all_routes={"tags": ["transactions"]},
     ),

@@ -60,6 +60,6 @@ jobs:
 
     - uses: WyriHaximus/github-action-helm3@v3
       with:
-        exec: helm -n myk-trade upgrade myk-trade ./myk-trade-chart/ --install --wait --atomic
+        exec: helm -n myk-trade upgrade myk-trade ./myk-trade-chart/ --install --wait --atomic --set image.tag=${{ github.sha }}
         kubeconfig: '${{ secrets.KUBECONFIG }}'
         overrule_existing_kubeconfig: "true"

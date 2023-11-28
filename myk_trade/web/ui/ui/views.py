@@ -81,8 +81,8 @@ async def send_echo_message(
             TransactionModel.all_columns(),
             TransactionModel.currency.code,
         )
-        .limit(100)
         .order_by(TransactionModel.created_at, ascending=False)
+        .limit(100)
         .run(nested=True)
     )
 

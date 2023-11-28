@@ -40,8 +40,8 @@ async def send_echo_message(
     )
     transactions_count = await TransactionModel.count().run()
 
-    transactions_amount = 0
     transactions_amount_24h = 0
+    transactions_amount = 0
     for currency in await CurrencyModel.select(CurrencyModel.all_columns()).run():
         transactions_24h = (
             await TransactionModel.select(
@@ -81,7 +81,8 @@ async def send_echo_message(
             TransactionModel.all_columns(),
             TransactionModel.currency.code,
         )
-        .order_by(TransactionModel.created_at, ascending=False)
+        .order_by(TransactionModel.id, ascending=False)
+        .limit(30)
         .run(nested=True)
     )
 

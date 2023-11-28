@@ -1,5 +1,6 @@
 from fastapi.routing import APIRouter
 from piccolo_api.crud.endpoints import PiccoloCRUD
+from piccolo_api.fastapi.endpoints import FastAPIKwargs, FastAPIWrapper
 
 from myk_trade.db.models import transactions as transactions_model
 from myk_trade.web.api import docs, monitoring, profile, transactions
@@ -15,8 +16,12 @@ api_router.include_router(
     prefix="/transactions",
     tags=["transactions"],
 )
-api_router.include_router(
-    PiccoloCRUD(transactions_model.TransactionModel, read_only=True),
-    prefix="/transactions",
-    tags=["transactions"],
+
+crud_wraped = FastAPIWrapper(
+    root_url="/transactions",
+    fastapi_app=api_router,
+    piccolo_crud=PiccoloCRUD(transactions_model.TransactionModel, read_only=True),
+    fastapi_kwargs=FastAPIKwargs(
+        all_routes={"tags": ["transactions"]},
+    ),
 )

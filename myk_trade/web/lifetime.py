@@ -13,6 +13,7 @@ from opentelemetry.sdk.resources import (
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import set_tracer_provider
+from piccolo.engine import engine_finder
 from prometheus_fastapi_instrumentator.instrumentation import (
     PrometheusFastApiInstrumentator,
 )
@@ -114,6 +115,8 @@ def register_startup_event(
         init_redis(app)
         setup_prometheus(app)
         app.middleware_stack = app.build_middleware_stack()
+        engine = engine_finder()
+        await engine.start_connection_pool()
         pass  # noqa: WPS420
 
     return _startup
@@ -133,6 +136,8 @@ def register_shutdown_event(
     async def _shutdown() -> None:  # noqa: WPS430
         await shutdown_redis(app)
         stop_opentelemetry(app)
+        engine = engine_finder()
+        await engine.stop_connection_pool()
         pass  # noqa: WPS420
 
     return _shutdown

@@ -52,6 +52,8 @@ spec:
           env:
             - name: MYK_TRADE_HOST
               value: "0.0.0.0"
+            - name: MYK_TRADE_WORKERS_COUNT
+              value: "4"
             - name: MYK_TRADE_DB_HOST
               value: "pg.myk.pp.ua"
             - name: MYK_TRADE_DB_PORT

@@ -137,7 +137,7 @@ def register_shutdown_event(
         await shutdown_redis(app)
         stop_opentelemetry(app)
         engine = engine_finder()
-        await engine.stop_connection_pool()
+        await engine.close_connection_pool()
         pass  # noqa: WPS420
 
     return _shutdown

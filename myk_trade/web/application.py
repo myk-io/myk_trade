@@ -45,6 +45,7 @@ def get_app() -> FastAPI:
             Mount(
                 "/admin/",
                 create_admin(
+                    site_name="Myk Trade Admin",
                     tables=[
                         BaseUser,
                         TokenAuth,
@@ -53,7 +54,6 @@ def get_app() -> FastAPI:
                         transactions.TransactionModel,
                     ],
                 ),
-                site_name="Myk Trade Admin",
             ),
             # Session Auth login:
             Mount(

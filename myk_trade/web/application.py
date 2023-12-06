@@ -53,6 +53,7 @@ def get_app() -> FastAPI:
                         transactions.TransactionModel,
                     ],
                 ),
+                site_name="Myk Trade Admin",
             ),
             # Session Auth login:
             Mount(

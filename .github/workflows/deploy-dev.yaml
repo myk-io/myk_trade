@@ -13,7 +13,7 @@ jobs:
     with:
       registry: ghcr.io
     secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      gh_token: ${{ secrets.GH_TOKEN }}
 
   call-deploy-to-k3s-dev:
     if: github.ref == 'refs/heads/dev'
@@ -21,4 +21,4 @@ jobs:
     with:
       registry: ghcr.io
     secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      gh_token: ${{ secrets.GH_TOKEN }}

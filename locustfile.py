@@ -38,7 +38,7 @@ def _(parser):
     )
 
 
-class TestTranscationsGet(HttpUser):
+class TestTranscations(HttpUser):
     @task
     def get_transaction(self):
         self.client.get("/api/transactions/")

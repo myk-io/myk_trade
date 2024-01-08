@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - main
+    - dev
 
 env:
   ENV_NAME: main
@@ -15,7 +16,9 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: main
+    environment:
+      name: ${{ github.ref_name }}
+      url: https://${{ env.ENV_NAME }}.test
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write

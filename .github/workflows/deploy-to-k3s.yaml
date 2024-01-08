@@ -1,4 +1,4 @@
-name: Deploy to k3s
+name: deploy to k3s
 
 on:
   workflow_call:
@@ -12,7 +12,8 @@ on:
     
 jobs:
   deploy:
-    name: Deploy
+    name: main
+
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name }}

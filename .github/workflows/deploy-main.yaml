@@ -1,22 +1,12 @@
-name: Deploy to k3s
+name: deploy main
 
 on:
   push:
     branches:
     - main
-    - dev
 
 jobs:
-  call-deploy-to-k3s-main:
-    if: github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/deploy-to-k3s.yaml
-    with:
-      registry: ghcr.io
-    secrets:
-      gh_token: ${{ secrets.GH_TOKEN }}
-
-  call-deploy-to-k3s-dev:
-    if: github.ref == 'refs/heads/dev'
+  call-deploy-to-k3s:
     uses: ./.github/workflows/deploy-to-k3s.yaml
     with:
       registry: ghcr.io

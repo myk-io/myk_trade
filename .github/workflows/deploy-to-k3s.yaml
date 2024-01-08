@@ -12,8 +12,6 @@ on:
     
 jobs:
   deploy:
-    name: job
-
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name }}

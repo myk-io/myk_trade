@@ -1,16 +1,8 @@
-name: Deploy to k3s[ovh0]
+name: Deploy to k3s
 
 on:
   push:
-    branches:
-    - main
-    - dev
-
-env:
-  ENV_NAME: main
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
+    branches: []
 
 jobs:
   deploy:

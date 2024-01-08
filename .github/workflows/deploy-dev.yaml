@@ -16,3 +16,5 @@ jobs:
     uses: ./.github/workflows/deploy-to-k3s.yaml
     with:
       registry: ghcr.io
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}

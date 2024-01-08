@@ -6,6 +6,9 @@ on:
       registry:
         type: string
         required: true
+    secrets:
+      gh_token:
+        required: true
     
 jobs:
   deploy:
@@ -28,7 +31,7 @@ jobs:
       with:
         registry: ${{ inputs.registry }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GH_TOKEN }}
+        password: ${{ secrets.gh_token }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3

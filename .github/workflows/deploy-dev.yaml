@@ -15,5 +15,5 @@ env:
 jobs:
   call-deploy-to-k3s:
     uses: ./.github/workflows/deploy-to-k3s.yaml
-
-  
+    with:
+      registry: ${{ env.REGISTRY }}

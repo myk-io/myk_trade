@@ -1,16 +1,20 @@
 name: Deploy to k3s
 
 on:
-  push:
-    branches: []
-
+  workflow_call:
+    inputs:
+      registry:
+        type: string
+        required: true
+    
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name }}
-      url: https://${{ env.ENV_NAME }}.test
+      url: https://env.test
+
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
@@ -22,7 +26,7 @@ jobs:
     - name: Log in to the Container registry
       uses: docker/login-action@v3
       with:
-        registry: ${{ env.REGISTRY }}
+        registry: ${{ inputs.registry }}
         username: ${{ github.actor }}
         password: ${{ secrets.GH_TOKEN }}
 
@@ -50,11 +54,6 @@ jobs:
         cache-to: type=gha,mode=max
         labels: ${{ steps.meta.outputs.labels }}
         tags: |
-          ${{ env.REGISTRY }}/${{ github.repository }}:latest
-          ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+          ${{ inputs.registry }}/${{ github.repository }}:latest
+          ${{ inputs.registry }}/${{ github.repository }}:${{ github.sha }}
 
-    - uses: WyriHaximus/github-action-helm3@v3
-      with:
-        exec: helm -n myk-trade upgrade myk-trade ./myk-trade-chart/ --install --wait --atomic --set image.tag=${{ github.sha }}
-        kubeconfig: '${{ secrets.KUBECONFIG }}'
-        overrule_existing_kubeconfig: "true"

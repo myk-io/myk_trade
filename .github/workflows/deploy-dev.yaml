@@ -1,4 +1,4 @@
-name: Deploy to k3s[ovh0]
+name: Deploy to k3s
 
 on:
   push:
@@ -6,13 +6,17 @@ on:
     - main
     - dev
 
-env:
-  ENV_NAME: main
-  IMAGE_NAME: ${{ github.repository }}
-
-
 jobs:
-  call-deploy-to-k3s:
+  call-deploy-to-k3s-main:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy-to-k3s.yaml
+    with:
+      registry: ghcr.io
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+  call-deploy-to-k3s-dev:
+    if: github.ref == 'refs/heads/dev'
     uses: ./.github/workflows/deploy-to-k3s.yaml
     with:
       registry: ghcr.io

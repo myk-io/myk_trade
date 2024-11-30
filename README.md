@@ -186,3 +186,10 @@ pytest -vv .
 ```
 piccolo user create --superuser
 ```
+
+# Start the server
+```
+poetry run python -m myk_trade
+```
+
+etcd1234

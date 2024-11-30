@@ -37,6 +37,20 @@ def _(parser):
         help="Wallet UUID 4",
     )
 
+    parser.add_argument(
+        "--hostss",
+        is_secret=False,
+        default="http://localhost:8000",
+        help="Host",
+    )
+
+    parser.add_argument(
+        "--users",
+        is_secret=False,
+        default=1,
+        help="Number of users",
+    )
+
 
 class TestTranscations(HttpUser):
     @task
